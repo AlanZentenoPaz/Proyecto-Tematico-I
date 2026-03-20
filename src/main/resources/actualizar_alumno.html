@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Alumno - UAM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --uam-orange: #f39200;
+            --uam-black: #1a1a1a;
+            --bg-gray: #f4f7f6;
+            --sidebar-width: 280px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--bg-gray); display: flex; height: 100vh; overflow: hidden; }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--uam-black);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .sidebar-header img { width: 120px; margin-bottom: 10px; }
+        .sidebar-header h3 { color: var(--uam-orange); font-size: 14px; }
+
+        .nav-btn {
+            padding: 14px 25px;
+            color: #bbb;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: #252525;
+            color: var(--uam-orange);
+            border-left-color: var(--uam-orange);
+        }
+
+        .nav-btn-exit {
+            margin-top: auto;
+            border-top: 1px solid #333;
+            color: #ff4d4d;
+        }
+
+        .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+
+        .top-bar {
+            background: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .content { padding: 40px; }
+
+        .card-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .grid-form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #444;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--uam-orange);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(243,146,0,0.1);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .search-box .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--uam-orange);
+            color: white;
+            border: 2px solid var(--uam-orange);
+        }
+
+        .btn-primary:hover {
+            background: #e07d00;
+        }
+
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--uam-orange);
+            color: var(--uam-orange);
+        }
+
+        .btn-outline:hover {
+            background: var(--uam-orange);
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .history-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--uam-orange);
+        }
+    </style>
+</head>
+<body>
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <img src="https://lh3.googleusercontent.com/proxy/owi7VzomYwFCE80U-3AVUf4U_gpCyCFmpCheSBdlqGDzvYi7vW0TISMO_3gnS2cjSOc8caYMrd210F_-lfZLBQIRa0_yULswjBcnJ0aR-wXg8wk3V5HB" alt="UAM">
+        <h3>ACTUALIZAR ALUMNO</h3>
+    </div>
+
+    <div class="nav-btn" onclick="window.location.href='dashboard.html'"><i class="fa-solid fa-house"></i> Inicio</div>
+    <div class="nav-btn" onclick="window.location.href='alta_alumno.html'"><i class="fa-solid fa-user-plus"></i> Dar Alta Alumno</div>
+    <div class="nav-btn" onclick="window.location.href='baja_alumno.html'"><i class="fa-solid fa-user-minus"></i> Dar de Baja Alumno</div>
+    <div class="nav-btn active" onclick="window.location.href='actualizar_alumno.html'"><i class="fa-solid fa-user-pen"></i> Actualizar Datos Alumno</div>
+    <div class="nav-btn" onclick="window.location.href='reportes_tecnicos.html'"><i class="fa-solid fa-screwdriver-wrench"></i> Reportes Técnicos</div>
+    <div class="nav-btn" onclick="window.location.href='historial_acciones.html'"><i class="fa-solid fa-clock-rotate-left"></i> Historial Acciones</div>
+    <div class="nav-btn" onclick="window.location.href='acceso_alumnos.html'"><i class="fa-solid fa-id-card-clip"></i> Acceso Alumnos</div>
+
+    <div class="nav-btn nav-btn-exit" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Salir del Sistema</div>
+</nav>
+
+<div class="main-container">
+    <header class="top-bar">
+        <h2>Actualizar Datos de Alumno</h2>
+        <div style="font-weight: 700; color: #666;" id="live-date"></div>
+    </header>
+
+    <div class="content">
+        <div class="card-panel" id="search-section">
+            <h3 style="margin-bottom: 25px; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-search" style="color: var(--uam-orange);"></i>
+                Buscar Alumno a Modificar
+            </h3>
+
+            <div class="search-box">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-id-card"></i> Matrícula del Alumno:</label>
+                    <input type="text" id="matricula-buscar" placeholder="Ej. 2213000456">
+                </div>
+                <button class="btn btn-primary" onclick="buscarAlumno()">
+                    <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                </button>
+            </div>
+        </div>
+
+        <div id="form-section" style="display: none;">
+            <div class="card-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Datos del Alumno</h3>
+                    <span class="badge badge-info">Última actualización: 2026-02-15</span>
+                </div>
+
+                <div class="grid-form">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-user"></i> Nombre:</label>
+                        <input type="text" id="nombre" value="Juan Carlos">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-user"></i> Apellidos:</label>
+                        <input type="text" id="apellidos" value="Pérez García">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-id-card"></i> Matrícula:</label>
+                        <input type="text" id="matricula" value="2213000456" disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-envelope"></i> Correo:</label>
+                        <input type="email" id="email" value="juan.perez@alumnos.cua.uam.mx">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-phone"></i> Teléfono:</label>
+                        <input type="tel" id="telefono" value="5512345678">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-calendar"></i> Fecha Nacimiento:</label>
+                        <input type="date" id="fecha_nacimiento" value="2000-05-15">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-book"></i> Licenciatura:</label>
+                        <input type="text" id="licenciatura" value="Ingeniería en Computación">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-layer-group"></i> Trimestre:</label>
+                        <input type="text" id="trimestre" value="23-O">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-check-circle"></i> Estatus Académico:</label>
+                        <select id="estatus">
+                            <option selected>Activo</option>
+                            <option>Sin carga</option>
+                            <option>Egresado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-flag"></i> Estado Cuenta:</label>
+                        <select id="estado_cuenta">
+                            <option selected>Activa</option>
+                            <option>Suspendida</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-outline" onclick="openModal('qr-modal')">
+                        <i class="fa-solid fa-qrcode"></i> Actualizar QR
+                    </button>
+                    <button class="btn btn-outline" onclick="openModal('facial-modal')">
+                        <i class="fa-solid fa-face-smile"></i> Actualizar Facial
+                    </button>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h4 style="margin-bottom: 15px;">Historial de Cambios</h4>
+                    <div class="history-item">
+                        <p><strong>2026-02-15 10:30</strong> - Admin: ADMIN_01</p>
+                        <p>Actualización de teléfono y correo</p>
+                    </div>
+                    <div class="history-item">
+                        <p><strong>2026-01-10 14:20</strong> - Admin: ADMIN_03</p>
+                        <p>Actualización de plantilla facial</p>
+                    </div>
+                </div>
+
+                <div class="grid-form" style="margin-top: 30px;">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-pen"></i> Motivo del Cambio:</label>
+                        <textarea id="motivo" rows="3" placeholder="Describa el motivo de la actualización..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-user-tie"></i> Administrador:</label>
+                        <input type="text" id="admin-name" value="Admin_Principal" disabled>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="cancelar()">
+                        <i class="fa-solid fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-primary" onclick="actualizarDatos()">
+                        <i class="fa-solid fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal QR -->
+<div id="qr-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;">
+    <div class="card-panel" style="width: 400px;">
+        <h3 style="margin-bottom: 20px;">Actualizar Código QR</h3>
+        <div style="text-align: center; background: #f9f9f9; padding: 30px; border-radius: 15px; margin-bottom: 20px;">
+            <i class="fa-solid fa-qrcode fa-5x" style="color: var(--uam-black);"></i>
+            <p style="margin-top: 10px; font-family: monospace;" id="qr-actual">UAM-2213000456-2026</p>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn btn-secondary" onclick="cerrarModal('qr-modal')">Cancelar</button>
+            <button class="btn btn-primary" onclick="generarNuevoQR()">Generar Nuevo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Facial -->
+<div id="facial-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;">
+    <div class="card-panel" style="width: 450px;">
+        <h3 style="margin-bottom: 20px;">Actualizar Plantilla Facial</h3>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 150px; height: 150px; background: #f0f0f0; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 3px solid var(--uam-orange);">
+                <i class="fa-solid fa-user fa-4x" style="color: #999;"></i>
+            </div>
+            <p style="margin-top: 10px;">ID Facial: <strong>FACE_78945</strong></p>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn btn-secondary" onclick="cerrarModal('facial-modal')">Cancelar</button>
+            <button class="btn btn-primary" onclick="recapturarFacial()">Recapturar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    if (!sessionStorage.getItem('admin_logged')) {
+        window.location.href = 'index.html';
+    }
+
+    function updateDateTime() {
+        document.getElementById('live-date').innerText = new Date().toLocaleString();
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    function buscarAlumno() {
+        const matricula = document.getElementById('matricula-buscar').value;
+        if (!matricula) {
+            alert('Ingrese una matrícula para buscar');
+            return;
+        }
+
+        document.getElementById('search-section').style.display = 'none';
+        document.getElementById('form-section').style.display = 'block';
+
+        // Simular carga de datos desde la tabla alumno
+        document.getElementById('admin-name').value = sessionStorage.getItem('admin_user') || 'Admin_Principal';
+    }
+
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+
+    function cerrarModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function generarNuevoQR() {
+        const matricula = document.getElementById('matricula').value;
+        const nuevoQR = `UAM-${matricula}-${Date.now()}`;
+        document.getElementById('qr-actual').innerText = nuevoQR;
+        alert('Nuevo código QR generado exitosamente');
+        cerrarModal('qr-modal');
+    }
+
+    function recapturarFacial() {
+        alert('Iniciando captura de nueva plantilla facial');
+        cerrarModal('facial-modal');
+    }
+
+    function actualizarDatos() {
+        const motivo = document.getElementById('motivo').value;
+        if (!motivo) {
+            alert('Por favor especifique el motivo del cambio');
+            return;
+        }
+
+        const matricula = document.getElementById('matricula').value;
+
+        // Simular actualización en tabla alumno
+        // Registrar en bitácora
+        registrarBitacora('Actualizar Datos Alumno', 'alumno', matricula, motivo);
+
+        alert('Datos actualizados exitosamente');
+        window.location.href = 'dashboard.html';
+    }
+
+    function cancelar() {
+        if (confirm('¿Cancelar la actualización?')) {
+            window.location.href = 'dashboard.html';
+        }
+    }
+
+    function registrarBitacora(accion, entidad, idRegistro, descripcion) {
+        console.log('Bitácora:', {accion, entidad, idRegistro, descripcion});
+    }
+
+    function logout() {
+        if(confirm("¿Desea cerrar la sesión actual?")) {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+    }
+</script>
+</body>
+</html>
