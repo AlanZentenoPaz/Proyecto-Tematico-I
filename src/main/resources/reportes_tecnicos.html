@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes Técnicos - UAM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --uam-orange: #f39200;
+      --uam-black: #1a1a1a;
+      --bg-gray: #f4f7f6;
+      --sidebar-width: 280px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body { background-color: var(--bg-gray); display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--uam-black);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+      box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    }
+
+    .sidebar-header {
+      padding: 0 20px 30px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .sidebar-header img { width: 120px; margin-bottom: 10px; }
+    .sidebar-header h3 { color: var(--uam-orange); font-size: 14px; }
+
+    .nav-btn {
+      padding: 14px 25px;
+      color: #bbb;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: 0.3s;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      background: #252525;
+      color: var(--uam-orange);
+      border-left-color: var(--uam-orange);
+    }
+
+    .nav-btn-exit {
+      margin-top: auto;
+      border-top: 1px solid #333;
+      color: #ff4d4d;
+    }
+
+    .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+
+    .top-bar {
+      background: white;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .content { padding: 40px; }
+
+    .card-panel {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    label {
+      font-weight: 600;
+      color: #444;
+      font-size: 14px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input, select {
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: #fafafa;
+      font-size: 15px;
+      width: 100%;
+      transition: all 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--uam-orange);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(243,146,0,0.1);
+    }
+
+    .btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: var(--uam-orange);
+      color: white;
+      border: 2px solid var(--uam-orange);
+    }
+
+    .btn-primary:hover {
+      background: #e07d00;
+    }
+
+    .btn-secondary {
+      background: #666;
+      color: white;
+    }
+
+    .btn-success {
+      background: #2e7d32;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #ff9800;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      background: #f8f9fa;
+      text-align: left;
+      padding: 15px;
+      border-bottom: 2px solid #eee;
+      color: #555;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    tr { cursor: pointer; }
+    tr:hover { background-color: #f9f9f9; }
+
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .status-atendido {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-proceso {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .status-noatendido {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .priority-high {
+      border-left: 4px solid #d32f2f;
+    }
+
+    .priority-medium {
+      border-left: 4px solid #ff9800;
+    }
+
+    .priority-low {
+      border-left: 4px solid #2e7d32;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .stat-card h3 {
+      font-size: 32px;
+      color: var(--uam-black);
+      margin-bottom: 5px;
+    }
+
+    .stat-card p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      width: 700px;
+      max-width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .resolution-box {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <img src="https://lh3.googleusercontent.com/proxy/owi7VzomYwFCE80U-3AVUf4U_gpCyCFmpCheSBdlqGDzvYi7vW0TISMO_3gnS2cjSOc8caYMrd210F_-lfZLBQIRa0_yULswjBcnJ0aR-wXg8wk3V5HB" alt="UAM">
+    <h3>REPORTES TÉCNICOS</h3>
+  </div>
+
+  <div class="nav-btn" onclick="window.location.href='dashboard.html'"><i class="fa-solid fa-house"></i> Inicio</div>
+  <div class="nav-btn" onclick="window.location.href='alta_alumno.html'"><i class="fa-solid fa-user-plus"></i> Dar Alta Alumno</div>
+  <div class="nav-btn" onclick="window.location.href='baja_alumno.html'"><i class="fa-solid fa-user-minus"></i> Dar de Baja Alumno</div>
+  <div class="nav-btn" onclick="window.location.href='actualizar_alumno.html'"><i class="fa-solid fa-user-pen"></i> Actualizar Datos Alumno</div>
+  <div class="nav-btn active" onclick="window.location.href='reportes_tecnicos.html'"><i class="fa-solid fa-screwdriver-wrench"></i> Reportes Técnicos</div>
+  <div class="nav-btn" onclick="window.location.href='historial_acciones.html'"><i class="fa-solid fa-clock-rotate-left"></i> Historial Acciones</div>
+  <div class="nav-btn" onclick="window.location.href='acceso_alumnos.html'"><i class="fa-solid fa-id-card-clip"></i> Acceso Alumnos</div>
+
+  <div class="nav-btn nav-btn-exit" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Salir del Sistema</div>
+</nav>
+
+<div class="main-container">
+  <header class="top-bar">
+    <h2>Reportes Técnicos - Torniquetes</h2>
+    <div style="font-weight: 700; color: #666;" id="live-date"></div>
+  </header>
+
+  <div class="content">
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>12</h3>
+        <p>Reportes Totales</p>
+      </div>
+      <div class="stat-card">
+        <h3 style="color: #c62828;">4</h3>
+        <p>No Atendidos</p>
+      </div>
+      <div class="stat-card">
+        <h3 style="color: #1976d2;">5</h3>
+        <p>En Proceso</p>
+      </div>
+      <div class="stat-card">
+        <h3 style="color: #2e7d32;">3</h3>
+        <p>Atendidos</p>
+      </div>
+    </div>
+
+    <div class="card-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h3>Listado de Incidencias en Torniquetes</h3>
+        <button class="btn btn-primary" onclick="openNewReportModal()">
+          <i class="fa-solid fa-plus"></i> Nuevo Reporte
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>Filtrar por Estatus:</label>
+          <select id="filtro-estatus" onchange="filtrarReportes()">
+            <option value="todos">Todos</option>
+            <option value="noatendido">No Atendido</option>
+            <option value="proceso">En Proceso</option>
+            <option value="atendido">Atendido</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Torniquete:</label>
+          <select id="filtro-torniquete" onchange="filtrarReportes()">
+            <option value="todos">Todos</option>
+            <option value="1">Torniquete 1</option>
+            <option value="2">Torniquete 2</option>
+            <option value="3">Torniquete 3</option>
+            <option value="4">Torniquete 4</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Buscar:</label>
+          <input type="text" id="buscar-reporte" placeholder="ID Reporte o descripción" onkeyup="filtrarReportes()">
+        </div>
+      </div>
+
+      <!-- Tabla de reportes -->
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+          <tr>
+            <th>ID Reporte</th>
+            <th>Torniquete</th>
+            <th>Fecha y Hora</th>
+            <th>Ubicación</th>
+            <th>Prioridad</th>
+            <th>Estatus</th>
+            <th>Reportado por</th>
+          </tr>
+          </thead>
+          <tbody id="tabla-reportes">
+          <tr onclick="abrirDetalleReporte('REP-001', 'Torniquete 1', '2026-03-14 09:30', 'Puerta Principal', 'Alta', 'No Atendido', 'Alumno', 'El lector QR no funciona correctamente, no detecta los códigos.')" class="priority-high">
+            <td>REP-001</td>
+            <td>Torniquete 1</td>
+            <td>2026-03-14 09:30</td>
+            <td>Puerta Principal</td>
+            <td><span style="color: #d32f2f;">Alta</span></td>
+            <td><span class="status-badge status-noatendido">No Atendido</span></td>
+            <td>Juan Pérez</td>
+          </tr>
+          <tr onclick="abrirDetalleReporte('REP-002', 'Torniquete 3', '2026-03-14 10:15', 'Puerta B', 'Media', 'En Proceso', 'Personal UAM', 'La cámara de reconocimiento facial no enfoca correctamente.')" class="priority-medium">
+            <td>REP-002</td>
+            <td>Torniquete 3</td>
+            <td>2026-03-14 10:15</td>
+            <td>Puerta B</td>
+            <td><span style="color: #ff9800;">Media</span></td>
+            <td><span class="status-badge status-proceso">En Proceso</span></td>
+            <td>María García</td>
+          </tr>
+          <tr onclick="abrirDetalleReporte('REP-003', 'Torniquete 2', '2026-03-13 16:45', 'Puerta A', 'Baja', 'Atendido', 'Alumno', 'Torniquete bloqueado por 5 minutos. Se reinició y funcionó.')" class="priority-low">
+            <td>REP-003</td>
+            <td>Torniquete 2</td>
+            <td>2026-03-13 16:45</td>
+            <td>Puerta A</td>
+            <td><span style="color: #2e7d32;">Baja</span></td>
+            <td><span class="status-badge status-atendido">Atendido</span></td>
+            <td>Carlos López</td>
+          </tr>
+          <tr onclick="abrirDetalleReporte('REP-004', 'Torniquete 4', '2026-03-14 08:20', 'Puerta C', 'Alta', 'No Atendido', 'Seguridad', 'El motor del torniquete no gira, posible atasco mecánico.')" class="priority-high">
+            <td>REP-004</td>
+            <td>Torniquete 4</td>
+            <td>2026-03-14 08:20</td>
+            <td>Puerta C</td>
+            <td><span style="color: #d32f2f;">Alta</span></td>
+            <td><span class="status-badge status-noatendido">No Atendido</span></td>
+            <td>Roberto Sánchez</td>
+          </tr>
+          <tr onclick="abrirDetalleReporte('REP-005', 'Torniquete 1', '2026-03-13 11:30', 'Puerta Principal', 'Media', 'En Proceso', 'Sistemas', 'Error en la lectura de códigos QR por reflectividad.')" class="priority-medium">
+            <td>REP-005</td>
+            <td>Torniquete 1</td>
+            <td>2026-03-13 11:30</td>
+            <td>Puerta Principal</td>
+            <td><span style="color: #ff9800;">Media</span></td>
+            <td><span class="status-badge status-proceso">En Proceso</span></td>
+            <td>Ana Martínez</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle Reporte -->
+<div id="modal-detalle" class="modal">
+  <div class="modal-content">
+    <h2 style="color: var(--uam-orange); margin-bottom: 25px;">
+      <i class="fa-solid fa-clipboard-list"></i> Detalle del Reporte <span id="detalle-id"></span>
+    </h2>
+
+    <div class="detail-row">
+      <strong>Torniquete:</strong>
+      <span id="detalle-torniquete"></span>
+    </div>
+    <div class="detail-row">
+      <strong>Fecha y Hora:</strong>
+      <span id="detalle-fecha"></span>
+    </div>
+    <div class="detail-row">
+      <strong>Ubicación:</strong>
+      <span id="detalle-ubicacion"></span>
+    </div>
+    <div class="detail-row">
+      <strong>Prioridad:</strong>
+      <span id="detalle-prioridad"></span>
+    </div>
+    <div class="detail-row">
+      <strong>Reportado por:</strong>
+      <span id="detalle-reportado"></span>
+    </div>
+    <div class="detail-row">
+      <strong>Estatus Actual:</strong>
+      <span id="detalle-estatus"></span>
+    </div>
+
+    <div style="margin-top: 25px;">
+      <label>Descripción del Problema:</label>
+      <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--uam-orange);">
+        <p id="detalle-descripcion"></p>
+      </div>
+    </div>
+
+    <div id="seccion-atencion" style="margin-top: 25px;">
+      <!-- Contenido dinámico según estatus -->
+    </div>
+
+    <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px;">
+      <button class="btn btn-secondary" onclick="cerrarModal()">
+        <i class="fa-solid fa-times"></i> Cerrar
+      </button>
+      <button class="btn btn-primary" id="btn-atender" onclick="atenderReporte()" style="display: none;">
+        <i class="fa-solid fa-wrench"></i> Atender Reporte
+      </button>
+      <button class="btn btn-success" id="btn-resolver" onclick="resolverReporte()" style="display: none;">
+        <i class="fa-solid fa-check"></i> Marcar como Resuelto
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nuevo Reporte -->
+<div id="modal-nuevo" class="modal">
+  <div class="modal-content">
+    <h2 style="color: var(--uam-orange); margin-bottom: 25px;">
+      <i class="fa-solid fa-plus-circle"></i> Nuevo Reporte Técnico
+    </h2>
+
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label>Torniquete:</label>
+      <select id="nuevo-torniquete">
+        <option value="1">Torniquete 1 - Puerta Principal</option>
+        <option value="2">Torniquete 2 - Puerta A</option>
+        <option value="3">Torniquete 3 - Puerta B</option>
+        <option value="4">Torniquete 4 - Puerta C</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label>Prioridad:</label>
+      <select id="nuevo-prioridad">
+        <option value="Alta">Alta</option>
+        <option value="Media" selected>Media</option>
+        <option value="Baja">Baja</option>
+      </select>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label>Descripción del Problema:</label>
+      <textarea id="nuevo-descripcion" rows="5" placeholder="Describa detalladamente el problema..."></textarea>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label>Reportado por:</label>
+      <input type="text" id="nuevo-reportado" value="Administrador" disabled>
+    </div>
+
+    <div style="display: flex; gap: 15px; justify-content: flex-end;">
+      <button class="btn btn-secondary" onclick="cerrarModalNuevo()">
+        <i class="fa-solid fa-times"></i> Cancelar
+      </button>
+      <button class="btn btn-primary" onclick="guardarReporte()">
+        <i class="fa-solid fa-save"></i> Guardar Reporte
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (!sessionStorage.getItem('admin_logged')) {
+    window.location.href = 'index.html';
+  }
+
+  function updateDateTime() {
+    document.getElementById('live-date').innerText = new Date().toLocaleString();
+  }
+  setInterval(updateDateTime, 1000);
+  updateDateTime();
+
+  function filtrarReportes() {
+    const estatus = document.getElementById('filtro-estatus').value;
+    const torniquete = document.getElementById('filtro-torniquete').value;
+    const busqueda = document.getElementById('buscar-reporte').value.toLowerCase();
+
+    const filas = document.querySelectorAll('#tabla-reportes tr');
+
+    filas.forEach(fila => {
+      let mostrar = true;
+
+      // Filtrar por estatus
+      if (estatus !== 'todos') {
+        const estatusCelda = fila.querySelector('.status-badge');
+        if (estatusCelda) {
+          const claseEstatus = estatusCelda.className;
+          if (estatus === 'noatendido' && !claseEstatus.includes('status-noatendido')) mostrar = false;
+          if (estatus === 'proceso' && !claseEstatus.includes('status-proceso')) mostrar = false;
+          if (estatus === 'atendido' && !claseEstatus.includes('status-atendido')) mostrar = false;
+        }
+      }
+
+      // Filtrar por torniquete
+      if (torniquete !== 'todos') {
+        const celdas = fila.getElementsByTagName('td');
+        if (celdas.length > 1 && !celdas[1].innerText.includes(torniquete)) mostrar = false;
+      }
+
+      // Filtrar por búsqueda
+      if (busqueda !== '') {
+        const texto = fila.innerText.toLowerCase();
+        if (!texto.includes(busqueda)) mostrar = false;
+      }
+
+      fila.style.display = mostrar ? '' : 'none';
+    });
+  }
+
+  function abrirDetalleReporte(id, torniquete, fecha, ubicacion, prioridad, estatus, reportado, descripcion) {
+    document.getElementById('detalle-id').innerText = id;
+    document.getElementById('detalle-torniquete').innerText = torniquete;
+    document.getElementById('detalle-fecha').innerText = fecha;
+    document.getElementById('detalle-ubicacion').innerText = ubicacion;
+    document.getElementById('detalle-prioridad').innerHTML = `<span style="color: ${prioridad === 'Alta' ? '#d32f2f' : prioridad === 'Media' ? '#ff9800' : '#2e7d32'};">${prioridad}</span>`;
+    document.getElementById('detalle-reportado').innerText = reportado;
+    document.getElementById('detalle-estatus').innerHTML = `<span class="status-badge status-${estatus.toLowerCase().replace(' ', '')}">${estatus}</span>`;
+    document.getElementById('detalle-descripcion').innerText = descripcion;
+
+    // Mostrar botones según estatus
+    const btnAtender = document.getElementById('btn-atender');
+    const btnResolver = document.getElementById('btn-resolver');
+
+    if (estatus === 'No Atendido') {
+      btnAtender.style.display = 'inline-flex';
+      btnResolver.style.display = 'none';
+    } else if (estatus === 'En Proceso') {
+      btnAtender.style.display = 'none';
+      btnResolver.style.display = 'inline-flex';
+    } else {
+      btnAtender.style.display = 'none';
+      btnResolver.style.display = 'none';
+    }
+
+    // Agregar información adicional según estatus
+    const seccionAtencion = document.getElementById('seccion-atencion');
+    if (estatus === 'En Proceso') {
+      seccionAtencion.innerHTML = `
+                    <div class="resolution-box">
+                        <h4 style="margin-bottom: 15px;">Progreso de Atención</h4>
+                        <p><strong>Atendiendo:</strong> Ing. Roberto Méndez (Sistemas)</p>
+                        <p><strong>Desde:</strong> 2026-03-14 11:30</p>
+                        <p><strong>Última actualización:</strong> Revisando componentes electrónicos</p>
+                    </div>
+                `;
+    } else if (estatus === 'Atendido') {
+      seccionAtencion.innerHTML = `
+                    <div class="resolution-box">
+                        <h4 style="margin-bottom: 15px;">Resolución Técnica</h4>
+                        <p><strong>Atendido por:</strong> Ing. Laura Torres</p>
+                        <p><strong>Fecha de resolución:</strong> 2026-03-14 14:30</p>
+                        <p><strong>Solución aplicada:</strong> Se realizó mantenimiento preventivo y calibración del sensor.</p>
+                    </div>
+                `;
+    } else {
+      seccionAtencion.innerHTML = '';
+    }
+
+    document.getElementById('modal-detalle').style.display = 'flex';
+  }
+
+  function atenderReporte() {
+    const id = document.getElementById('detalle-id').innerText;
+    const admin = sessionStorage.getItem('admin_user') || 'Administrador';
+
+    // Simular actualización en base de datos
+    alert(`Reporte ${id} asignado a ${admin} para su atención`);
+
+    // Registrar en bitácora
+    registrarBitacora('Atender Reporte Técnico', 'punto_acceso', id, `Reporte asignado a ${admin}`);
+
+    cerrarModal();
+    // Recargar para mostrar cambio
+    location.reload();
+  }
+
+  function resolverReporte() {
+    const id = document.getElementById('detalle-id').innerText;
+
+    // Aquí se podría abrir un modal para capturar la resolución
+    const resolucion = prompt('Describa la solución aplicada:');
+    if (resolucion) {
+      alert(`Reporte ${id} marcado como resuelto`);
+      registrarBitacora('Resolver Reporte Técnico', 'punto_acceso', id, resolucion);
+      cerrarModal();
+      location.reload();
+    }
+  }
+
+  function openNewReportModal() {
+    document.getElementById('modal-nuevo').style.display = 'flex';
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-detalle').style.display = 'none';
+  }
+
+  function cerrarModalNuevo() {
+    document.getElementById('modal-nuevo').style.display = 'none';
+  }
+
+  function guardarReporte() {
+    const torniquete = document.getElementById('nuevo-torniquete').value;
+    const prioridad = document.getElementById('nuevo-prioridad').value;
+    const descripcion = document.getElementById('nuevo-descripcion').value;
+
+    if (!descripcion) {
+      alert('Por favor ingrese una descripción del problema');
+      return;
+    }
+
+    // Simular guardado en base de datos
+    const idReporte = 'REP-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+    alert(`Reporte ${idReporte} creado exitosamente`);
+
+    registrarBitacora('Crear Reporte Técnico', 'punto_acceso', idReporte, descripcion);
+
+    cerrarModalNuevo();
+    location.reload();
+  }
+
+  function registrarBitacora(accion, entidad, idRegistro, descripcion) {
+    console.log('Bitácora:', {accion, entidad, idRegistro, descripcion, admin: sessionStorage.getItem('admin_user')});
+  }
+
+  function logout() {
+    if(confirm("¿Desea cerrar la sesión actual?")) {
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    }
+  }
+</script>
+</body>
+</html>
